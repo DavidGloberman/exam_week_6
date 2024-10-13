@@ -35,7 +35,7 @@ export const studentRegister = asyncHandler(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const newStudent: IStudent = req.body;
     const added = await userService.createStudent(newStudent);
-    res.status(201).json({ message: "Student created successfully" });
+    res.status(201).json({ message: "Student created successfully" ,data: added});
   }
 );
 

@@ -10,30 +10,25 @@ export const getGrades = async (id: string): Promise<IGrade[]> => {
   return student.grades;
 };
 
-// export const getAverageGrade = async (wantedUser: IUser): Promise<number> => {
-//   if (wantedUser.grades.length === 0) {
-//     return 0;
-//   }
+export const getAverageGrade = async (teacher: ITeacher): Promise<number> => {
+  if (teacher.students.length === 0) {
+    return 0;
+  }
 
-//   //----------------------------------
-//   const result = await UserModel.aggregate([
-//     {
-//       $match: { _id: wantedUser._id },
-//     },
-//     {
-//       $project: {
-//         _id: 0,
-//         avgGrade: { $avg: "$grades.grade" },
-//       },
-//     },
-//   ]);
-//   console.log("result:", result);
-//   //-----------------------------------------
-//   return (
-//     wantedUser.grades.reduce((a: number, b: IGrade) => a + b.grade, 0) /
-//     wantedUser.grades.length
-//   );
-// };
+  // get average grade for all students in the class
+  const result = await Student.aggregate([
+    {
+      $match: { _id: { $in: teacher.students } },
+    },
+    {
+      $project: {
+        _id: 0,
+        avgGrade: { $avg: "$grades.grade" },
+      },
+    },
+  ]);
+  return result[0].avgGrade;
+};
 
 export const addGrade = async (
   teacher: ITeacher,
@@ -75,39 +70,43 @@ export const addGrade = async (
   return newGrade;
 };
 
-// export const updateGrade = async (
-//   teacher: ITeacher,
-//   studentId: string,
-//   newGrade: IGrade
-// ): Promise<IGrade> => {
-//   if (!studentId) {
-//     throw new ErrorWithStatusCode("studentId is required", 400);
-//   }
+export const updateGrade = async (
+  teacher: ITeacher,
+  studentId: string,
+  newGrade: IGrade
+): Promise<IGrade> => {
+  if (!studentId) {
+    throw new ErrorWithStatusCode("studentId is required", 400);
+  }
 
-//   if (!newGrade.grade || !newGrade.note) {
-//     throw new ErrorWithStatusCode("grade and note are required", 400);
-//   }
+  if (!newGrade.grade || !newGrade.note || !newGrade._id) {
+    throw new ErrorWithStatusCode(" grade and note and _id are required", 400);
+  }
 
-//   // check if student is in teacher's class
-//   const teacherUser = await Teacher.findOne({ _id: teacher._id });
-//   if (!teacherUser) {
-//     throw new ErrorWithStatusCode("Teacher not found", 404);
-//   }
+  // check if student is in teacher's class
+  const teacherUser = await Teacher.findOne({ _id: teacher._id });
+  if (!teacherUser) {
+    throw new ErrorWithStatusCode("Teacher not found", 404);
+  }
 
-//   const isStudentInTeacherClass = teacherUser.students
-//     .toString()
-//     .includes(studentId);
-//   if (!isStudentInTeacherClass) {
-//     throw new ErrorWithStatusCode("forbidden, student not in class", 403);
-//   }
+  const isStudentInTeacherClass = teacherUser.students
+    .toString()
+    .includes(studentId);
+  if (!isStudentInTeacherClass) {
+    throw new ErrorWithStatusCode("forbidden, student not in class", 403);
+  }
 
-//   // check if student exists
-//   const student = await Student.findOne({ _id: studentId });
-//   if (!student) {
-//     throw new ErrorWithStatusCode("Student not found", 404);
-//   }
+  // check if student exists
+  const student = await Student.findOne({ _id: studentId });
+  if (!student) {
+    throw new ErrorWithStatusCode("Student not found", 404);
+  }
 
-//   // יש לסיים לוגיקה שתעשה את השינוי
+  const updatedGrade = await Student.findOneAndUpdate(
+    { _id: studentId, "grades._id": newGrade._id },
+    { $set: { "grades.$": newGrade } },
+    { new: true }
+  );
 
-//   return newGrade;
-// };
+  return updatedGrade as unknown as IGrade;
+};

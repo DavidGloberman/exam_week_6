@@ -10,9 +10,7 @@ router
   .route("/grade/:id")
   .get(gradesController.getGrades)
   .post(gradesController.addGrade)
-  // .put(gradesController.updateGrade);
-
-// router.route("/avgGrade").get(gradesController.getAverageGrade);
+  .put(gradesController.updateGrade);
 
 router.route("/allStudents").get(getAllStudents);
 

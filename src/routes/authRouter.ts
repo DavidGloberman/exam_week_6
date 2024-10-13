@@ -44,7 +44,7 @@ const router = express.Router();
  *
  */
 
-router.route("/studentsRegister").post(authController.studentRegister);
+router.route("/studentRegister").post(authController.studentRegister);
 
 /**
  * @swagger
