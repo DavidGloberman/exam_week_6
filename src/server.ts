@@ -1,15 +1,15 @@
 import express, { Application } from "express";
-
 import dotenv from "dotenv";
-import { errorMiddleware } from "./middleware/errorHandler.js";
+import cookieParser from "cookie-parser";
+import swaggerUi from "swagger-ui-express";
+import specs from "./swagger.js";
+
+import { connectDB } from "./config/db.js";
 import authRouter from "./routes/authRouter.js";
 import studentRouter from "./routes/studentRouter.js";
 import teacherRouter from "./routes/teacherRouter.js";
 import { authMiddleware } from "./middleware/authMiddleware.js";
-import { connectDB } from "./config/db.js";
-import cookieParser from "cookie-parser";
-import swaggerUi from "swagger-ui-express";
-import specs from "./swagger.js";
+import { errorMiddleware } from "./middleware/errorHandler.js";
 
 dotenv.config();
 connectDB();

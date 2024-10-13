@@ -3,7 +3,7 @@ import validator from "validator";
 
 export interface IGrade {
   grade: number;
-  node: string;
+  note: string;
 }
 
 export interface IStudent extends mongoose.Document {
@@ -11,6 +11,7 @@ export interface IStudent extends mongoose.Document {
   email: string;
   password: string;
   grades: IGrade[];
+  className: string;
 }
 
 const gradeSchema: mongoose.Schema<IGrade> = new mongoose.Schema({
@@ -20,11 +21,11 @@ const gradeSchema: mongoose.Schema<IGrade> = new mongoose.Schema({
     min: [0, "Grade cannot be less than 0"],
     max: [100, "Grade cannot be more than 100"],
   },
-  node: {
+  note: {
     type: String,
-    required: [true, "Node is required"],
-    minlength: [3, "Node cannot be less than 3 character"],
-    maxlength: [500, "Node cannot be more than 500 characters"],
+    required: [true, "note is required"],
+    minlength: [3, "note cannot be less than 3 character"],
+    maxlength: [500, "note cannot be more than 500 characters"],
     trim: true,
   },
 });
