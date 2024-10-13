@@ -1,29 +1,29 @@
-import express, { Request, Response, NextFunction } from "express";
-import asyncHandler from "../middleware/asyncHandler.js";
-import { IStudent } from "../models/student.js";
-import { ITeacher } from "../models/teacher.js";
 import jwt from "jsonwebtoken";
-import * as studentService from "../services/userService.js";
-import * as teacherService from "../services/teacherService.js";
+import express, { Request, Response, NextFunction } from "express";
+import asyncHandler from "../middleware/asyncHandler";
+import { IStudent } from "../models/student";
+import { ITeacher } from "../models/teacher";
+import * as userService from "../services/userService";
 
-import { ErrorWithStatusCode } from "../models/errorTypes.js";
+import { ErrorWithStatusCode } from "../models/errorTypes";
 
 export const login = asyncHandler(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const { passportId, password } = req.body;
-    const user = await studentService.authenticateUser(passportId, password);
+    const { email, password } = req.body;
+    const user = await userService.authenticateUser(email, password);
 
     if (!user) {
       throw new ErrorWithStatusCode("User not found", 404);
     }
+
     const token = jwt.sign(
-      { passportId: user.passportId },
+      { email: user.email },
       process.env.JWT_SECRET as string,
       { expiresIn: "1h" }
     );
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: process.env.MODE_ENV === "production",
       maxAge: 3600000,
     });
 
@@ -34,15 +34,15 @@ export const login = asyncHandler(
 export const studentRegister = asyncHandler(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const newStudent: IStudent = req.body;
-    const added = await studentService.createStudent(newStudent);
-    res.status(201).json({ message: "User created successfully" });
+    const added = await userService.createStudent(newStudent);
+    res.status(201).json({ message: "Student created successfully" });
   }
 );
 
 export const teacherRegister = asyncHandler(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const newTeacher: ITeacher = req.body;
-    const added = await teacherService.createTeacher(newTeacher);
-    res.status(201).json({ message: "User created successfully", data: added });
+    const added = await userService.createTeacher(newTeacher);
+    res.status(201).json({ message: "Teacher created successfully", className: added.className });
   }
 );

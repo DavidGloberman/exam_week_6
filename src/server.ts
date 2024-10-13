@@ -2,14 +2,14 @@ import express, { Application } from "express";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import swaggerUi from "swagger-ui-express";
-import specs from "./swagger.js";
+import specs from "./swagger";
 
-import { connectDB } from "./config/db.js";
-import authRouter from "./routes/authRouter.js";
-import studentRouter from "./routes/studentRouter.js";
-import teacherRouter from "./routes/teacherRouter.js";
-import { authMiddleware } from "./middleware/authMiddleware.js";
-import { errorMiddleware } from "./middleware/errorHandler.js";
+import { connectDB } from "./config/db";
+import authRouter from "./routes/authRouter";
+import studentRouter from "./routes/studentRouter";
+import teacherRouter from "./routes/teacherRouter";
+import { authMiddleware } from "./middleware/authMiddleware";
+import { errorMiddleware } from "./middleware/errorHandler";
 
 dotenv.config();
 connectDB();
@@ -17,7 +17,7 @@ const app: Application = express();
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

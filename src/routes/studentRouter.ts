@@ -1,6 +1,6 @@
 import express from "express";
-import * as gradesController from "../controllers/gradesController.js";
-import { studentMiddleware } from "../middleware/authMiddleware.js";
+import * as gradesController from "../controllers/gradesController";
+import { studentMiddleware } from "../middleware/authMiddleware";
 
 const router = express.Router();
 

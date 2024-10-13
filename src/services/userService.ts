@@ -1,9 +1,45 @@
-import { ErrorWithStatusCode } from "../models/errorTypes.js";
-import Student, { IGrade, IStudent } from "../models/student.js";
-import Teacher, { ITeacher } from "../models/teacher.js";
+import e from "express";
+import { ErrorWithStatusCode } from "../models/errorTypes";
+import Student, { IStudent } from "../models/student";
+import Teacher, { ITeacher } from "../models/teacher";
 import bcrypt from "bcrypt";
 
 const SALT_ROUNDS = 10;
+
+export const createTeacher = async (
+  newTeacher: ITeacher
+): Promise<ITeacher> => {
+  if (
+    !newTeacher.fullName ||
+    !newTeacher.email ||
+    !newTeacher.className ||
+    !newTeacher.password
+  ) {
+    throw new ErrorWithStatusCode(" All fields are required", 400);
+  }
+
+  const emailExist =
+    (await Student.findOne({ email: newTeacher.email })) ||
+    (await Teacher.findOne({ email: newTeacher.email }));
+  if (emailExist) {
+    throw new ErrorWithStatusCode("User's email already exists", 409);
+  }
+
+  const classNameExists = await Teacher.findOne({
+    className: newTeacher.className,
+  });
+  if (classNameExists) {
+    throw new ErrorWithStatusCode("Teacher's class already exists", 409);
+  }
+
+  newTeacher.password = await bcrypt.hash(newTeacher.password, SALT_ROUNDS);
+  try {
+    const added = await Teacher.create(newTeacher);
+    return added;
+  } catch (error: any) {
+    throw new ErrorWithStatusCode(error.message, 400);
+  }
+};
 
 export const createStudent = async (
   newStudent: IStudent
@@ -47,86 +83,44 @@ export const createStudent = async (
 };
 
 export const authenticateUser = async (
-  passportId: string,
+  email: string,
   password: string
-): Promise<IUser> => {
-  if (!passportId || !password) {
-    throw new ErrorWithStatusCode("passportId and password are required", 401);
+): Promise<IStudent | ITeacher> => {
+  if (!email || !password) {
+    throw new ErrorWithStatusCode("email and password are required", 401);
   }
-  const user = await UserModel.findOne({ passportId });
+  const user =
+    (await Student.findOne({ email: email })) ||
+    (await Teacher.findOne({ email: email }));
   if (!user) {
     throw new ErrorWithStatusCode("User not found", 401);
   }
 
   if (!(await bcrypt.compare(password, user.password))) {
-    throw new ErrorWithStatusCode("invalid id or password", 401);
+    throw new ErrorWithStatusCode("Wrong password", 401);
   }
 
   return user;
 };
 
-export const getAllUsers = async (): Promise<IUser[]> => {
-  return await UserModel.find();
-};
-
-export const getAverageGrade = async (wantedUser: IUser): Promise<number> => {
-  if (wantedUser.grades.length === 0) {
-    return 0;
-  }
-
-  //----------------------------------
-  const result = await UserModel.aggregate([
-    {
-      $match: { _id: wantedUser._id },
-    },
-    {
-      $project: {
-        _id: 0,
-        avgGrade: { $avg: "$grades.grade" },
-      },
-    },
-  ]);
-  console.log("result:", result);
-  //-----------------------------------------
-  return (
-    wantedUser.grades.reduce((a: number, b: IGrade) => a + b.grade, 0) /
-    wantedUser.grades.length
+export const getAllStudents = async (teacher: ITeacher) => {
+  const students = await Teacher.findOne({ _id: teacher._id }).populate(
+    "students"
   );
+  if (!students) {
+    throw new ErrorWithStatusCode("Teacher not found", 404);
+  }
+  return students.students;
 };
 
-export const addGrade = async (
-  passportId: string,
-  newGrade: IGrade
-): Promise<void> => {
-  console.log("passportId:", passportId);
-
-  if (!passportId) {
-    throw new ErrorWithStatusCode("passportId is required", 400);
+export const getUserByEmail = async (
+  email: string
+): Promise<IStudent | ITeacher> => {
+  const user =
+    (await Student.findOne({ email: email })) ||
+    (await Teacher.findOne({ email: email }));
+  if (!user) {
+    throw new ErrorWithStatusCode("User not found", 404);
   }
-  if (!newGrade) {
-    throw new ErrorWithStatusCode("grade is required", 400);
-  }
-
-  const wantedUser: IUser | null = await UserModel.findOne({
-    passportId: passportId,
-  });
-  if (!wantedUser) {
-    throw new Error("User not found");
-  }
-
-  wantedUser.grades.push(newGrade);
-  wantedUser.save();
-};
-
-export const updateGrade = async (
-  passportId: string,
-  newGrade: IGrade
-): Promise<void> => {
-  if (!passportId) {
-    throw new ErrorWithStatusCode("passportId is required", 400);
-  }
-  const user = await getUserByPassportId(passportId);
-  user.grades = user.grades.filter((g) => g.subject !== newGrade.subject);
-  user.grades.push(newGrade);
-  user.save();
+  return user;
 };

@@ -9,7 +9,7 @@ const options = {
       description: "Documentation for the Swagger Express API of collage app",
     },
   },
-  apis: ["./routes/*.js"], // Path to your API routes
+  apis: ["./src/routes/*.ts"], // Path to your API routes
 };
 
 const specs = swaggerJSDoc(options);

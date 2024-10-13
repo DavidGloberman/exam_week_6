@@ -1,9 +1,92 @@
 import express from "express";
-import * as authController from "../controllers/authController.js";
+import * as authController from "../controllers/authController";
 
 const router = express.Router();
 
+/**
+ * @swagger
+ * /student/register:
+ *   post:
+ *     summary: registers a new student
+ *     requestBody:
+ *            required: true
+ *            content:
+ *              application/json:
+ *                  schema:
+ *                    type: object
+ *                    properties:
+ *                      fullName:
+ *                        type: string
+ *                      email:
+ *                        type: string
+ *                      password:
+ *                        type: string
+ *                      className:
+ *                        type:string
+ *                    example:
+ *                      fullName: John Doe
+ *                      email: example@gmail.com
+ *                      password: 1234
+ *                      className: moshe
+ *
+ *     responses:
+ *       201:
+ *         description: register
+ *         content:
+ *           application/json:
+ *              schema:
+ *                type: object
+ *                properties:
+ *                  message:
+ *                    type: string
+ *                    example: "Student created successfully"
+ *
+ *
+ */
+
 router.route("/studentsRegister").post(authController.studentRegister);
+
+/**
+ * @swagger
+ * /teacher/register:
+ *   post:
+ *     summary: registers a new teacher
+ *     requestBody:
+ *            required: true
+ *            content:
+ *              application/json:
+ *                  schema:
+ *                    type: object
+ *                    properties:
+ *                      fullName:
+ *                        type: string
+ *                      email:
+ *                        type: string
+ *                      password:
+ *                        type: string
+ *                      className:
+ *                        type:string
+ *                    example:
+ *                      fullName: John Doe
+ *                      email: example@gmail.com
+ *                      password: 1234
+ *                      className: moshe
+ *
+ *     responses:
+ *       201:
+ *         description: register
+ *         content:
+ *           application/json:
+ *              schema:
+ *                type: object
+ *                properties:
+ *                  message:
+ *                    type: string
+ *                    example: "Teacher created successfully"
+ *
+ *
+ */
+router.route("/teacherRegister").post(authController.teacherRegister);
 
 /**
  * @swagger
@@ -17,13 +100,13 @@ router.route("/studentsRegister").post(authController.studentRegister);
  *                  schema:
  *                    type: object
  *                    properties:
- *                      passportId:
+ *                      email:
  *                        type: string
  *                      password:
  *                        type: string
  *                    example:
- *                      passportId: 123456789
- *                      password: password
+ *                      email: example@gmail.com
+ *                      password: 1234
  *
  *     responses:
  *       201:
@@ -39,46 +122,6 @@ router.route("/studentsRegister").post(authController.studentRegister);
  *
  *
  */
-router.route("/teacherRegister").post(authController.teacherRegister);
-
-/**
- * @swagger
- * /register:
- *   post:
- *     summary: registers a new user
- *     requestBody:
- *            required: true
- *            content:
- *              application/json:
- *                  schema:
- *                    type: object
- *                    properties:
- *                      fullName:
- *                        type: string
- *                      passportId:
- *                        type: string
- *                      password:
- *                        type: string
- *                    example:
- *                      fullName: John Doe
- *                      passportId: 123456789
- *                      password: password
- *
- *     responses:
- *       201:
- *         description: register
- *         content:
- *           application/json:
- *              schema:
- *                type: object
- *                properties:
- *                  message:
- *                    type: string
- *                    example: "User created successfully"
- *
- *
- */
-
 router.route("/login").post(authController.login);
 
 export default router;
